@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Homebrew additions</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+  <script src="styles.js"></script>
+  <script src="stylesAPI.js"></script>
+</head>
+<body>
+
+<script>
+
+$( document ).ready(function(){
+  //Test for missing styles
+  var correctStyles = ["American Light Lager","American Lager","Cream Ale","American Wheat Beer","International Pale Lager","International Amber Lager","International Dark Lager","Czech Pale Lager","Czech Premium Pale Lager","Czech Amber Lager","Czech Dark Lager","Munich Helles","Festbier","Helles Bock","German Leichtbier","Kölsch","German Helles Exportbier","German Pils","Märzen","Rauchbier","Dunkles Bock","Vienna Lager","Altbier","Pale Kellerbier","Amber Kellerbier","Munich Dunkel","Schwarzbier","Doppelbock","Eisbock","Baltic Porter","Weissbier","Dunkles Weissbier","Weizenbock","Ordinary Bitter","Best Bitter","Strong Bitter","British Golden Ale","Australian Sparkling Ale","English IPA","Dark Mild","British Brown Ale","English Porter","Scottish Light","Scottish Heavy","Scottish Export","Irish Red Ale","Irish Stout","Irish Extra Stout","Sweet Stout","Oatmeal Stout","Tropical Stout","Foreign Extra Stout","British Strong Ale","Old Ale","Wee Heavy","English Barleywine","Blonde Ale","American Pale Ale","American Amber Ale","California Common","American Brown Ale","American Porter","American Stout","Imperial Stout","American IPA","Belgian IPA","Black IPA","Brown IPA","Red IPA","Rye IPA","White IPA","Double IPA","American Strong Ale","American Barleywine","Wheatwine","Berliner Weisse","Flanders Red Ale","Oud Bruin","Lambic","Gueuze","Fruit Lambic","Witbier","Belgian Pale Ale","Bière de Garde","Belgian Blond Ale","Saison","Belgian Golden Strong Ale","Trappist Single","Belgian Dubbel","Belgian Tripel","Belgian Dark Strong Ale","Gose","Kentucky Common","Lichtenhainer","London Brown Ale","Piwo Grodziskie","Pre-Prohibition Lager","Pre-Prohibition Porter","Roggenbier","Sahti"];
+  var newStyles = styleNames();
+  var inboth = [];
+  var notinnew = [];
+  for(var i = 0; i < correctStyles.length; i++){
+    if(newStyles.indexOf(correctStyles[i]) >= 0){
+      inboth.push(correctStyles[i]);
+    }
+    else{
+      notinnew.push(correctStyles[i]);
+    }
+  }
+  $("#missingStyles").html(notinnew.length + "<br/>" + notinnew.toString());
+  
+  // Test for missing categories
+  var correctCategories = ["Standard American Beer", "International Lager", "Czech Lager", "Pale Malty European Lager", "Pale Bitter European Beer", "Amber Malty European Lager", "Amber Bitter European Beer", "Dark European Lager", "Strong European Beer", "German Wheat Beer", "British Bitter", "Pale Commonwealth Beer", "Brown British Beer", "Scottish Ale", "Irish Beer", "Dark British Beer", "Strong British Ale", "Pale American Ale", "Amber and Brown American Beer", "American Porter and Stout", "IPA", "Strong American Ale", "European Sour Ale", "Belgian Ale", "Strong Belgian Ale", "Trappist Ale", "Historical Beer"];  
+  var newCategories = categories();
+  var inboth = [];
+  var notinnew = [];
+  for(var i = 0; i < correctCategories.length; i++){
+    if(newCategories.indexOf(correctCategories[i]) >= 0){
+      inboth.push(newCategories[i]);
+    }
+    else{
+      notinnew.push(newCategories[i]);
+    }
+  }
+  $("#missingCategories").html(notinnew.length + "<br/>" + notinnew.toString());
+  
+  //Check for string keys
+  var locstylesList = stylesList();
+  var stringkeys = ["appearance","aroma","characteristic_ingredients","comments","flavor","history","letter","mouthfeel","name","overall_impression","style_comparison"];
+  var errors = [];
+  for(var i = 0; i < locstylesList.length; i++){
+    var currentStyle = locstylesList[i];
+    for(var j = 0; j < stringkeys.length; j++){
+      var currentKey = stringkeys[j];
+        if(typeof(currentStyle[currentKey]) == "undefined"){
+          errors.push("<br>"+currentStyle.name + ": " + currentKey + " does not appear to be set");
+        } else if(typeof(currentStyle[currentKey]) !== "string"){
+          errors.push("<br>"+currentStyle.name + ": " + currentKey + " does not appear to be valid");
+        }
+    }
+  }
+  $("#stringCheck").html(errors.length + "<br/>" + errors.toString());
+  
+  
+  //Check arrays- commercial_examples, "tags"
+  var arrayKeys = ["commercial_examples", "tags"];
+  var errors = [];
+  for(var i = 0; i < locstylesList.length; i++){
+    var currentStyle = locstylesList[i];
+    for(var j = 0; j < arrayKeys.length; j++){
+      var currentKey = arrayKeys[j];
+        if(typeof(currentStyle[currentKey]) == "undefined"){
+          errors.push("<br>"+currentStyle.name + ": " + currentKey + " does not appear to be set");
+        } else if(typeof(currentStyle[currentKey]) !== "object"){
+          errors.push("<br>"+currentStyle.name + ": " + currentKey + " does not appear to be valid");
+        } else if(currentStyle[currentKey].length < 1){
+          errors.push("<br>"+currentStyle.name + ": " + currentKey + " has suspiciously few elements");
+        } 
+    }
+  }
+   $("#arrayCheck").html(errors.length + "<br/>" + errors.toString());
+  
+  //check vital statistics
+  //Check arrays- commercial_examples, "tags"
+  var arrayKeys = ["abv","ibu","srm","fg","og"];
+  var errors = [];
+  for(var i = 0; i < locstylesList.length; i++){
+    var currentVital = locstylesList[i]["vital_statistics"];
+    if(typeof(currentVital) == "undefined"){
+      errors.push("<br>"+currentStyle.name + ": vital_statistics does not appear to be set");
+    } else{
+      for(var j = 0; j < arrayKeys.length; j++){
+        var curType = currentVital[arrayKeys[j]];
+        if(typeof(curType) == "undefined"){
+            errors.push("<br>"+currentStyle.name + ": "+ curType +" does not appear to be set");
+          } else if(typeof(curType["low"]) !== "string"){
+            errors.push("<br>"+currentStyle.name + ": " + curType + " low does not appear to be valid");
+          } else if(typeof(curType["high"]) !== "string"){
+            errors.push("<br>"+currentStyle.name + ": " + curType + "high does not appear to be valid");
+          } 
+      }
+    }
+  }
+   $("#vitalCheck").html(errors.length + "<br/>" + errors.toString());
+  
+});
+
+
+</script>
+
+<div class="container">
+  <h1 id="output">Styles Tests</h1>
+  <h2>Missing styles</h2>
+  <p><em>Should be empty</em></p>
+  <p id="missingStyles">Loading...</p>
+  <h2>Missing categories</h2>
+  <p><em>Should be empty</em></p>
+  <p id="missingCategories">Loading...</p>
+  <h2>String objects check</h2>
+  <p><em>Should be empty</em></p>
+  <p id="stringCheck">Loading...</p>
+  <h2>Array check</h2>
+  <p><em>Should be empty</em></p>
+  <p id="arrayCheck">Loading...</p>
+  <h2>Vital statistics check</h2>
+  <p><em>Should be empty</em></p>
+  <p id="vitalCheck">Loading...</p>
+</div>
+
+
+</body>
+</html>
